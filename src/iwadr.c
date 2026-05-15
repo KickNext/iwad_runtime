@@ -481,7 +481,7 @@ int iwadr_load_game(int slot) {
 }
 
 void iwadr_shutdown(void) {
-  if (!iwadr_started && !iwadr_quit_requested) {
+  if (!iwadr_started) {
     iwadr_set_suspended(0);
     return;
   }
@@ -906,5 +906,4 @@ void DG_SetWindowTitle(const char* title) {
 
 void DG_Quit(void) {
   iwadr_quit_requested = 1;
-  iwadr_stop_runtime();
 }

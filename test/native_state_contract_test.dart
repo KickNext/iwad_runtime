@@ -79,6 +79,18 @@ void main() {
     expect(function, contains('iwadr_finish_shutdown()'));
   });
 
+  test('native shutdown is a no-op after engine quit cleanup completed', () {
+    final source = File('src/iwadr.c').readAsStringSync();
+    final shutdownFunction = _functionBody(source, 'iwadr_shutdown');
+
+    expect(
+      shutdownFunction,
+      contains(
+        'if (!iwadr_started) {\n    iwadr_set_suspended(0);\n    return;',
+      ),
+    );
+  });
+
   test('native quit cleanup runs after the engine tick unwinds', () {
     final tickFunction = _functionBodyFromFile('src/iwadr.c', 'iwadr_tick');
     final quitFunction = _functionBodyFromFile('src/iwadr.c', 'DG_Quit');
@@ -90,10 +102,27 @@ void main() {
     expect(tickFunction, contains('doomgeneric_Tick();'));
     expect(tickFunction, contains('iwadr_finish_shutdown();'));
     expect(quitFunction, isNot(contains('doomgeneric_Shutdown')));
-    expect(quitFunction, contains('iwadr_stop_runtime();'));
+    expect(quitFunction, isNot(contains('iwadr_stop_runtime();')));
     expect(finishFunction, contains('iwadr_stop_runtime();'));
     expect(finishFunction, contains('doomgeneric_Shutdown();'));
   });
+
+  test(
+    'native quit signal remains observable until the next runtime start',
+    () {
+      final prepareStartFunction = _functionBodyFromFile(
+        'src/iwadr.c',
+        'iwadr_prepare_start',
+      );
+      final finishFunction = _functionBodyFromFile(
+        'src/iwadr.c',
+        'iwadr_finish_shutdown',
+      );
+
+      expect(prepareStartFunction, contains('iwadr_quit_requested = 0;'));
+      expect(finishFunction, isNot(contains('iwadr_quit_requested = 0;')));
+    },
+  );
 
   test('native shutdown resets process-wide engine state for next IWAD', () {
     final shutdown = _functionBodyFromFile(

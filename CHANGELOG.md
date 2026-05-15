@@ -1,3 +1,10 @@
+## 0.1.4
+
+* Fixed native shutdown after an in-game Exit so Flutter route disposal does not
+  run the engine quit cleanup a second time.
+* Kept the native quit signal observable until the next runtime start so
+  controllers can leave cleanly after engine-initiated Exit.
+
 ## 0.1.3
 
 * Corrected release notes wording to keep engine references generic.
