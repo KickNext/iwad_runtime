@@ -95,7 +95,7 @@ void main() {
     expect(finishFunction, contains('doomgeneric_Shutdown();'));
   });
 
-  test('native shutdown resets process-wide Doom state for next IWAD', () {
+  test('native shutdown resets process-wide engine state for next IWAD', () {
     final shutdown = _functionBodyFromFile(
       'src/doomgeneric/doomgeneric.c',
       'doomgeneric_Shutdown',

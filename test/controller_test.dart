@@ -117,7 +117,7 @@ void main() {
     expect(backend.newGames, <String>['2:1:1']);
   });
 
-  test('save and load reject slots outside Doom save range', () async {
+  test('save and load reject slots outside engine save range', () async {
     final backend = _FakeBackend();
     final controller = IwadController(backend: backend);
 

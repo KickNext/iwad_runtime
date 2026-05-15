@@ -1,7 +1,11 @@
+## 0.1.3
+
+* Corrected release notes wording to keep engine references generic.
+
 ## 0.1.2
 
 * Fixed native runtime shutdown so a quit or dispose fully clears process-wide
-  Doom state before the next start.
+  engine state before the next start.
 * Reset mutable startup, menu, sound, WAD, and zone state across repeated
   native sessions.
 
