@@ -1,6 +1,6 @@
 name: iwad_runtime
 description: "A Flutter IWAD runtime for app-supplied game data with native and web backends."
-version: 0.1.0
+version: 0.1.1
 homepage: https://github.com/KickNext/iwad_runtime
 repository: https://github.com/KickNext/iwad_runtime
 topics:
