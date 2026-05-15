@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - iwad_runtime (0.1.0):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - iwad_runtime (from `.symlinks/plugins/iwad_runtime/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  iwad_runtime:
+    :path: ".symlinks/plugins/iwad_runtime/ios"
+
+SPEC CHECKSUMS:
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  iwad_runtime: 94c10fed19a598b1d78e93aa8ca89bccb1cc9f43
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.16.2

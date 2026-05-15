@@ -1,0 +1,9 @@
+miniaudio
+=========
+
+Source: https://github.com/mackron/miniaudio
+Version: 0.11.25
+
+miniaudio is distributed under a choice of public domain or MIT No Attribution
+(MIT-0). This package uses the public-domain option. The vendored source file
+also contains the upstream license statements.
