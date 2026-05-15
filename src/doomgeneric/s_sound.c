@@ -105,6 +105,21 @@ static musicinfo_t *mus_playing = NULL;
 
 int snd_channels = 8;
 
+static void S_ResetMusicState(void)
+{
+    int i;
+
+    mus_paused = false;
+    mus_playing = NULL;
+
+    for (i = 0; i < NUMMUSIC; i++)
+    {
+        S_music[i].lumpnum = 0;
+        S_music[i].data = NULL;
+        S_music[i].handle = NULL;
+    }
+}
+
 //
 // Initializes sound stuff, including volume
 // Sets channels, SFX and music volume,
@@ -145,14 +160,22 @@ void S_Init(int sfxVolume, int musicVolume)
 
 void S_Shutdown(void)
 {
+    S_StopMusic();
     I_ShutdownSound();
     I_ShutdownMusic();
+    channels = NULL;
+    S_ResetMusicState();
 }
 
 static void S_StopChannel(int cnum)
 {
     int i;
     channel_t *c;
+
+    if (channels == NULL)
+    {
+        return;
+    }
 
     c = &channels[cnum];
 
@@ -192,6 +215,11 @@ void S_Start(void)
 {
     int cnum;
     int mnum;
+
+    if (channels == NULL)
+    {
+        return;
+    }
 
     // kill all playing sounds at start of level
     //  (trust me - a good idea)
@@ -244,6 +272,11 @@ void S_StopSound(mobj_t *origin)
 {
     int cnum;
 
+    if (channels == NULL)
+    {
+        return;
+    }
+
     for (cnum=0 ; cnum<snd_channels ; cnum++)
     {
         if (channels[cnum].sfxinfo && channels[cnum].origin == origin)
@@ -265,6 +298,11 @@ static int S_GetChannel(mobj_t *origin, sfxinfo_t *sfxinfo)
     int                cnum;
     
     channel_t*        c;
+
+    if (channels == NULL)
+    {
+        return -1;
+    }
 
     // Find an open channel
     for (cnum=0 ; cnum<snd_channels ; cnum++)
@@ -397,6 +435,11 @@ void S_StartSound(void *origin_p, int sfx_id)
     int cnum;
     int volume;
 
+    if (channels == NULL)
+    {
+        return;
+    }
+
     origin = (mobj_t *) origin_p;
     volume = snd_SfxVolume;
 
@@ -509,6 +552,11 @@ void S_UpdateSounds(mobj_t *listener)
     int                sep;
     sfxinfo_t*        sfx;
     channel_t*        c;
+
+    if (channels == NULL)
+    {
+        return;
+    }
 
     I_UpdateSound();
 

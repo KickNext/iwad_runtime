@@ -76,6 +76,104 @@ void main() {
     final function = _functionBody(source, 'iwadr_shutdown');
 
     expect(function, contains('I_Quit()'));
+    expect(function, contains('iwadr_finish_shutdown()'));
+  });
+
+  test('native quit cleanup runs after the engine tick unwinds', () {
+    final tickFunction = _functionBodyFromFile('src/iwadr.c', 'iwadr_tick');
+    final quitFunction = _functionBodyFromFile('src/iwadr.c', 'DG_Quit');
+    final finishFunction = _functionBodyFromFile(
+      'src/iwadr.c',
+      'iwadr_finish_shutdown',
+    );
+
+    expect(tickFunction, contains('doomgeneric_Tick();'));
+    expect(tickFunction, contains('iwadr_finish_shutdown();'));
+    expect(quitFunction, isNot(contains('doomgeneric_Shutdown')));
+    expect(quitFunction, contains('iwadr_stop_runtime();'));
+    expect(finishFunction, contains('iwadr_stop_runtime();'));
+    expect(finishFunction, contains('doomgeneric_Shutdown();'));
+  });
+
+  test('native shutdown resets process-wide Doom state for next IWAD', () {
+    final shutdown = _functionBodyFromFile(
+      'src/doomgeneric/doomgeneric.c',
+      'doomgeneric_Shutdown',
+    );
+    final quit = _functionBodyFromFile('src/doomgeneric/i_system.c', 'I_Quit');
+    final wadShutdown = _functionBodyFromFile(
+      'src/doomgeneric/w_wad.c',
+      'W_Shutdown',
+    );
+    final closeLumpFiles = _functionBodyFromFile(
+      'src/doomgeneric/w_wad.c',
+      'W_CloseLumpFiles',
+    );
+    final zoneShutdown = _functionBodyFromFile(
+      'src/doomgeneric/z_zone.c',
+      'Z_Shutdown',
+    );
+
+    expect(
+      shutdown.indexOf('W_Shutdown();'),
+      lessThan(shutdown.indexOf('Z_Shutdown();')),
+    );
+    expect(shutdown, contains('DG_ScreenBuffer = NULL'));
+    expect(quit, contains('exit_funcs = NULL'));
+    expect(quit, contains('free(entry)'));
+    expect(wadShutdown, contains('W_CloseLumpFiles();'));
+    expect(closeLumpFiles, contains('W_CloseFile(wad_file)'));
+    expect(wadShutdown, contains('lumpinfo = NULL'));
+    expect(wadShutdown, contains('numlumps = 0'));
+    expect(zoneShutdown, contains('free(mainzone)'));
+    expect(zoneShutdown, contains('mainzone = NULL'));
+  });
+
+  test('native startup resets mutable menu and game identity state', () {
+    final resetStartup = _functionBodyFromFile(
+      'src/doomgeneric/d_main.c',
+      'D_ResetStartupState',
+    );
+    final resetMenu = _functionBodyFromFile(
+      'src/doomgeneric/m_menu.c',
+      'M_ResetMenuDefinitions',
+    );
+
+    expect(resetStartup, contains('gamemode = indetermined'));
+    expect(resetStartup, contains('gamemission = none'));
+    expect(resetStartup, contains('gamedescription = NULL'));
+    expect(resetStartup, contains('gameaction = ga_nothing'));
+    expect(resetMenu, contains('MainDef.numitems = main_end'));
+    expect(resetMenu, contains('MainDef.lastOn = 0'));
+    expect(resetMenu, contains('EpiDef.numitems = ep_end'));
+    expect(resetMenu, contains('NewDef.prevMenu = &EpiDef'));
+  });
+
+  test('native sound shutdown clears stale audio and music pointers', () {
+    final shutdown = _functionBodyFromFile(
+      'src/doomgeneric/s_sound.c',
+      'S_Shutdown',
+    );
+    final startSound = _functionBodyFromFile(
+      'src/doomgeneric/s_sound.c',
+      'S_StartSound',
+    );
+    final updateSounds = _functionBodyFromFile(
+      'src/doomgeneric/s_sound.c',
+      'S_UpdateSounds',
+    );
+    final resetMusic = _functionBodyFromFile(
+      'src/doomgeneric/s_sound.c',
+      'S_ResetMusicState',
+    );
+
+    expect(shutdown, contains('S_StopMusic();'));
+    expect(shutdown, contains('channels = NULL'));
+    expect(shutdown, contains('S_ResetMusicState();'));
+    expect(startSound, contains('channels == NULL'));
+    expect(updateSounds, contains('channels == NULL'));
+    expect(resetMusic, contains('mus_playing = NULL'));
+    expect(resetMusic, contains('S_music[i].handle = NULL'));
   });
 
   test('native default config dir follows Flutter writable temp dir', () {
@@ -144,9 +242,12 @@ void main() {
   });
 }
 
+String _functionBodyFromFile(String path, String name) =>
+    _functionBody(File(path).readAsStringSync(), name);
+
 String _functionBody(String source, String name) {
   final pattern = RegExp(
-    '(?:int|void|(?:static\\s+)?char\\s*\\*)\\s*$name\\s*\\([^)]*\\)\\s*\\{(?<body>.*?)\\n\\}',
+    '(?:(?:static\\s+)?(?:int|void)|(?:static\\s+)?char\\s*\\*)\\s*$name\\s*\\([^)]*\\)\\s*\\{(?<body>.*?)\\n\\}',
     dotAll: true,
   );
   final match = pattern.firstMatch(source);

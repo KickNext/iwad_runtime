@@ -569,6 +569,59 @@ void W_GenerateHashTable(void)
     // All done!
 }
 
+static void W_CloseLumpFiles(void)
+{
+    unsigned int i;
+    unsigned int j;
+
+    for (i = 0; i < numlumps; ++i)
+    {
+        wad_file_t *wad_file = lumpinfo[i].wad_file;
+
+        if (wad_file == NULL)
+        {
+            continue;
+        }
+
+        for (j = 0; j < i; ++j)
+        {
+            if (lumpinfo[j].wad_file == wad_file)
+            {
+                break;
+            }
+        }
+
+        if (j == i)
+        {
+            W_CloseFile(wad_file);
+        }
+    }
+}
+
+void W_Shutdown(void)
+{
+    if (lumpinfo == NULL && lumphash == NULL)
+    {
+        numlumps = 0;
+        return;
+    }
+
+    if (lumphash != NULL)
+    {
+        Z_Free(lumphash);
+        lumphash = NULL;
+    }
+
+    if (lumpinfo != NULL)
+    {
+        W_CloseLumpFiles();
+    }
+
+    free(lumpinfo);
+    lumpinfo = NULL;
+    numlumps = 0;
+}
+
 // Lump names that are unique to particular game types. This lets us check
 // the user is not trying to play with the wrong executable, eg.
 // chocolate-doom -iwad hexen.wad.

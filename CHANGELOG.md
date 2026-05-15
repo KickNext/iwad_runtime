@@ -1,3 +1,10 @@
+## 0.1.2
+
+* Fixed native runtime shutdown so a quit or dispose fully clears process-wide
+  Doom state before the next start.
+* Reset mutable startup, menu, sound, WAD, and zone state across repeated
+  native sessions.
+
 ## 0.1.1
 
 * Improved pub.dev metadata, license detection, and public API documentation.

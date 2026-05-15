@@ -31,6 +31,7 @@ extern "C" {
 #endif
 
 void doomgeneric_Create(int argc, char **argv);
+void doomgeneric_Shutdown(void);
 void doomgeneric_Tick();
 
 

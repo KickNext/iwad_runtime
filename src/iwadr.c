@@ -135,6 +135,32 @@ static void iwadr_reset_multiplayer_state(void) {
   memset(iwadr_multiplayer_ingame, 0, sizeof(iwadr_multiplayer_ingame));
 }
 
+static void iwadr_reset_runtime_state(void) {
+  iwadr_event_head = 0;
+  iwadr_event_tail = 0;
+  iwadr_pending_weapon_slot = -1;
+  iwadr_reset_mouse_event();
+  iwadr_reset_multiplayer_state();
+}
+
+static void iwadr_stop_runtime(void) {
+  iwadr_started = 0;
+  iwadr_suspended = 0;
+  iwadr_reset_runtime_state();
+  iwadr_set_mouse_capture(0);
+}
+
+static void iwadr_prepare_start(void) {
+  iwadr_quit_requested = 0;
+  iwadr_suspended = 0;
+  iwadr_reset_runtime_state();
+}
+
+static void iwadr_finish_shutdown(void) {
+  iwadr_stop_runtime();
+  doomgeneric_Shutdown();
+}
+
 static void iwadr_render_current_frame(void) {
   I_StartFrame();
   S_UpdateSounds(players[consoleplayer].mo);
@@ -222,13 +248,7 @@ int iwadr_start(const char* iwad_path) {
 
   snprintf(iwadr_iwad_path_arg, sizeof(iwadr_iwad_path_arg), "%s", iwad_path);
   iwadr_set_error(NULL);
-  iwadr_quit_requested = 0;
-  iwadr_suspended = 0;
-  iwadr_event_head = 0;
-  iwadr_event_tail = 0;
-  iwadr_pending_weapon_slot = -1;
-  iwadr_reset_mouse_event();
-  iwadr_reset_multiplayer_state();
+  iwadr_prepare_start();
 
   doomgeneric_Create((int)(sizeof(iwadr_argv) / sizeof(iwadr_argv[0])),
                      iwadr_argv);
@@ -461,12 +481,13 @@ int iwadr_load_game(int slot) {
 }
 
 void iwadr_shutdown(void) {
-  if (!iwadr_started) {
+  if (!iwadr_started && !iwadr_quit_requested) {
     iwadr_set_suspended(0);
     return;
   }
 
   I_Quit();
+  iwadr_finish_shutdown();
 }
 
 int iwadr_tick(void) {
@@ -489,7 +510,11 @@ int iwadr_tick(void) {
 
   iwadr_flush_mouse_event();
   doomgeneric_Tick();
-  return iwadr_quit_requested ? 0 : 1;
+  if (iwadr_quit_requested) {
+    iwadr_finish_shutdown();
+    return 0;
+  }
+  return 1;
 }
 
 int iwadr_copy_frame_rgba(uint8_t* out, int out_len) {
@@ -881,12 +906,5 @@ void DG_SetWindowTitle(const char* title) {
 
 void DG_Quit(void) {
   iwadr_quit_requested = 1;
-  iwadr_started = 0;
-  iwadr_suspended = 0;
-  iwadr_event_head = 0;
-  iwadr_event_tail = 0;
-  iwadr_pending_weapon_slot = -1;
-  iwadr_reset_mouse_event();
-  iwadr_reset_multiplayer_state();
-  iwadr_set_mouse_capture(0);
+  iwadr_stop_runtime();
 }

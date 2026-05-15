@@ -2074,8 +2074,54 @@ void M_Ticker (void)
 //
 // M_Init
 //
+static void M_ResetMenuDefinitions(void)
+{
+    MainMenu[readthis].status = 1;
+    M_StringCopy(MainMenu[readthis].name, "M_RDTHIS",
+                 sizeof(MainMenu[readthis].name));
+    MainMenu[readthis].routine = M_ReadThis;
+    MainMenu[readthis].alphaKey = 'r';
+
+    MainDef.numitems = main_end;
+    MainDef.prevMenu = NULL;
+    MainDef.menuitems = MainMenu;
+    MainDef.routine = M_DrawMainMenu;
+    MainDef.x = 97;
+    MainDef.y = 64;
+    MainDef.lastOn = 0;
+
+    EpiDef.numitems = ep_end;
+    EpiDef.prevMenu = &MainDef;
+    EpiDef.menuitems = EpisodeMenu;
+    EpiDef.routine = M_DrawEpisode;
+    EpiDef.x = 48;
+    EpiDef.y = 63;
+    EpiDef.lastOn = ep1;
+
+    NewDef.numitems = newg_end;
+    NewDef.prevMenu = &EpiDef;
+    NewDef.menuitems = NewGameMenu;
+    NewDef.routine = M_DrawNewGame;
+    NewDef.x = 48;
+    NewDef.y = 63;
+    NewDef.lastOn = hurtme;
+
+    OptionsDef.lastOn = 0;
+    ReadDef1.x = 280;
+    ReadDef1.y = 185;
+    ReadDef1.lastOn = 0;
+    ReadDef2.x = 330;
+    ReadDef2.y = 175;
+    ReadDef2.lastOn = 0;
+    SoundDef.lastOn = 0;
+    LoadDef.lastOn = 0;
+    SaveDef.lastOn = 0;
+}
+
 void M_Init (void)
 {
+    M_ResetMenuDefinitions();
+
     currentMenu = &MainDef;
     menuactive = 0;
     itemOn = currentMenu->lastOn;

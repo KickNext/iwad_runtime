@@ -251,11 +251,15 @@ void I_Quit (void)
     // Run through all exit functions
  
     entry = exit_funcs; 
+    exit_funcs = NULL;
 
     while (entry != NULL)
     {
+        atexit_listentry_t *next = entry->next;
+
         entry->func();
-        entry = entry->next;
+        free(entry);
+        entry = next;
     }
 
 #if ORIGCODE

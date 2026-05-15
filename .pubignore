@@ -1,6 +1,7 @@
 build/
 .dart_tool/
 .savegame/
+savegame/
 docs/
 AGENTS.md
 pubspec.lock

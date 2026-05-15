@@ -131,6 +131,43 @@ int             show_endoom = 1;
 void D_ConnectNetGame(void);
 void D_CheckNetGame(void);
 
+static void D_ResetStartupState(void)
+{
+    gamemode = indetermined;
+    gamemission = none;
+    gameversion = exe_final2;
+    gamedescription = NULL;
+    modifiedgame = false;
+    bfgedition = false;
+    main_loop_started = false;
+
+    devparm = false;
+    nomonsters = false;
+    respawnparm = false;
+    fastparm = false;
+
+    startskill = sk_medium;
+    startepisode = 1;
+    startmap = 1;
+    autostart = false;
+    startloadgame = -1;
+    advancedemo = false;
+    storedemo = false;
+
+    deathmatch = 0;
+    netgame = false;
+    timelimit = 0;
+    consoleplayer = 0;
+    displayplayer = 0;
+    singledemo = false;
+    demoplayback = false;
+    demorecording = false;
+    usergame = false;
+    gameaction = ga_nothing;
+    gamestate = GS_DEMOSCREEN;
+    wipegamestate = GS_DEMOSCREEN;
+}
+
 
 //
 // D_ProcessEvents
@@ -1172,6 +1209,8 @@ void D_DoomMain (void)
 #if ORIGCODE
     int numiwadlumps;
 #endif
+
+    D_ResetStartupState();
 
     I_AtExit(D_Endoom, false);
 
