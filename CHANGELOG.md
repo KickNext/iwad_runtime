@@ -1,3 +1,8 @@
+## 0.1.5
+
+* Updated package resolution for the latest Flutter stable SDK.
+* Fixed native contract tests so they are stable with Windows line endings.
+
 ## 0.1.4
 
 * Fixed native shutdown after an in-game Exit so Flutter route disposal does not

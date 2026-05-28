@@ -275,6 +275,7 @@ String _functionBodyFromFile(String path, String name) =>
     _functionBody(File(path).readAsStringSync(), name);
 
 String _functionBody(String source, String name) {
+  source = source.replaceAll('\r\n', '\n');
   final pattern = RegExp(
     '(?:(?:static\\s+)?(?:int|void)|(?:static\\s+)?char\\s*\\*)\\s*$name\\s*\\([^)]*\\)\\s*\\{(?<body>.*?)\\n\\}',
     dotAll: true,
